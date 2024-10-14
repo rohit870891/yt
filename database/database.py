@@ -8,6 +8,7 @@ database = dbclient[DB_NAME]
 user_data = database['users']
 admin_data= database['admins']
 link_data = database['links']
+collection = database['premium-users']
 
 default_verify = {
     'is_verified': False,
