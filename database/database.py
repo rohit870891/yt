@@ -1,7 +1,6 @@
 import time
 import pymongo, os
 from config import DB_URL, DB_NAME
-from bot import Bot
 import motor.motor_asyncio
 from config import ADMINS, DB_URL, DB_NAME
 
