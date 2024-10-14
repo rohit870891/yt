@@ -29,7 +29,7 @@ async def start_command(client: Client, message: Message):
             logging.error(f"Error adding user: {e}")
             return
     verify_status = await get_verify_status(id)
-    if USE_SHORTLINK and (not U_S_E_P):
+    is_premium = await is_premium_user(id)
         for i in range(1):
             if id in ADMINS:
                 continue
@@ -43,50 +43,39 @@ async def start_command(client: Client, message: Message):
                 if verify_status["link"] == "":
                     reply_markup = None
                 await message.reply(f"Your token successfully verified and valid for: {get_exp_time(VERIFY_EXPIRE)} ⏳", reply_markup=reply_markup, protect_content=False, quote=True)
-    if len(message.text) > 7:
-        for i in range(1):
-            if USE_SHORTLINK and (not U_S_E_P):
-                if USE_SHORTLINK:
-                    if id not in ADMINS:
-                        try:
-                            if not verify_status['is_verified']:
-                                continue
-                        except:
-                            continue
+    elif string.startswith("premium"):
+            if not is_premium:
+                # Notify user to get premium
+                await message.reply("Buy premium to access this content\nTo Buy Contact @rohit_1888", reply_markup=PREMIUM_BUTTON2)
+                return
+# Handle premium logic
             try:
-                base64_string = message.text.split(" ", 1)[1]
+                base64_string = text.split(" ", 1)[1]
             except:
                 return
-            _string = await decode(base64_string)
-            argument = _string.split("-")
-            if (len(argument) == 5) or (len(argument) == 4):
-                if not await present_hash(base64_string):
-                    try:
-                        await gen_new_count(base64_string)
-                    except:
-                        pass
-                await inc_count(base64_string)
-                if len(argument) == 5:
-                    try:
-                        start = int(int(argument[3]) / abs(client.db_channel.id))
-                        end = int(int(argument[4]) / abs(client.db_channel.id))
-                    except:
-                        return
-                    if start <= end:
-                        ids = range(start, end + 1)
-                    else:
-                        ids = []
-                        i = start
-                        while True:
-                            ids.append(i)
-                            i -= 1
-                            if i < end:
-                                break
-                elif len(argument) == 4:
-                    try:
-                        ids = [int(int(argument[3]) / abs(client.db_channel.id))]
-                    except:
-                        return
+            string = await decode(base64_string)
+            argument = string.split("-")
+            if len(argument) == 3:
+                try:
+                    start = int(int(argument[1]) / abs(client.db_channel.id))
+                    end = int(int(argument[2]) / abs(client.db_channel.id))
+                except:
+                    return
+                if start <= end:
+                    ids = range(start, end + 1)
+                else:
+                    ids = []
+                    i = start
+                    while True:
+                        ids.append(i)
+                        i -= 1
+                        if i < end:
+                            break
+            elif len(argument) == 2:
+                try:
+                    ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+                except:
+                    return
                 temp_msg = await message.reply("Please wait... 🫷")
                 try:
                     messages = await get_messages(client, ids)
@@ -241,7 +230,7 @@ async def start_command(client: Client, message: Message):
             quote=True
         )
         return
-    if USE_SHORTLINK and (not U_S_E_P):
+    elif string.startswith("get"):
         if id in ADMINS:
             return
         verify_status = await get_verify_status(id)
