@@ -25,8 +25,9 @@ async def start_command(client: Client, message: Message):
     if not await present_user(id):
         try:
             await add_user(id)
-        except:
-            pass
+        except Exception as e:
+            logging.error(f"Error adding user: {e}")
+            return
     verify_status = await get_verify_status(id)
     if USE_SHORTLINK and (not U_S_E_P):
         for i in range(1):
