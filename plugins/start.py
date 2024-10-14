@@ -565,22 +565,10 @@ async def add_premium_user(client: Client, msg: Message):
     except ValueError:
         await msg.reply_text("Invalid user_id or time_limit. Please recheck.")
 
-@Bot.on_message(filters.private & filters.command('removepaid') & filters.user(ADMINS))
-async def pre_remove_user(client: Client, msg: Message):
-    if len(msg.command) != 2:
-        await msg.reply_text("useage: /removeuser user_id ")
-        return
-    try:
-        user_id = int(msg.command[1])
-        await remove_premium(user_id)
-        await msg.reply_text(f"User {user_id} has been removed.")
-    except ValueError:
-        await msg.reply_text("user_id must be an integer or not available in database.")
-
-from pyrogram.errors.exceptions.bad_request_400 import PeerIdInvalid
 @Bot.on_message(filters.private & filters.command('listpaid') & filters.user(ADMINS))
 async def list_premium_users_command(client, message):
-    premium_users = collection.find({})
+    premium_users_cursor = collection.find({})
+    premium_users = await premium_users_cursor.to_list(length=None)  # Convert cursor to list
     premium_user_list = ['Premium Users in database:']
 
     for user in premium_users:
@@ -592,16 +580,29 @@ async def list_premium_users_command(client, message):
             expiration_timestamp = user["expiration_timestamp"]
             xt = (expiration_timestamp - time.time())
             x = round(xt / (24 * 60 * 60))
-            premium_user_list.append(f"UserID- <code>{user_ids}</code>\nUser- @{username}\nName- <code>{first_name}</code>\nExpiry- {x} days")
+            premium_user_list.append(
+                f"UserID- <code>{user_ids}</code>\n"
+                f"User- @{username}\n"
+                f"Name- <code>{first_name}</code>\n"
+                f"Expiry- {x} days"
+            )
         except PeerIdInvalid:
-            premium_user_list.append(f"UserID- <code>{user_ids}</code>\nUser- <code>Invalid ID</code>\nName- <code>Unknown</code>\nExpiry- <code>N/A</code>")
+            premium_user_list.append(
+                f"UserID- <code>{user_ids}</code>\n"
+                f"User- <code>Invalid ID</code>\n"
+                f"Name- <code>Unknown</code>\n"
+                f"Expiry- <code>N/A</code>"
+            )
         except Exception as e:
-            premium_user_list.append(f"UserID- <code>{user_ids}</code>\nUser- <code>Error: {str(e)}</code>\nName- <code>Unknown</code>\nExpiry- <code>N/A</code>")
+            premium_user_list.append(
+                f"UserID- <code>{user_ids}</code>\n"
+                f"User- <code>Error: {str(e)}</code>\n"
+                f"Name- <code>Unknown</code>\n"
+                f"Expiry- <code>N/A</code>"
+            )
 
     if premium_user_list:
         formatted_list = [f"{user}" for user in premium_user_list]
         await message.reply_text("\n\n".join(formatted_list))
     else:
         await message.reply_text("I found 0 premium users in my DB")
-
-        
