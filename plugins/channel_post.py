@@ -42,16 +42,25 @@ async def new_post(client: Client, message: Message):
 
     if DISABLE_CHANNEL_BUTTON:
         return
-
-    converted_id = message.id * abs(client.db_channel.id)
+    converted_id = post_message.id * abs(client.db_channel.id)
     string = f"get-{converted_id}"
     base64_string = await encode(string)
-    link = f"https://t.me/{client.username}?start={base64_string}"
-    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("🔁 Share URL", url=f'https://telegram.me/share/url?url={link}')]])
-    try:
-        await message.edit_reply_markup(reply_markup)
-    except FloodWait as e:
-        await asyncio.sleep(e.value)
-        await message.edit_reply_markup(reply_markup)
-    except Exception:
-        pass
+    link = f"https://telegram.me/{client.username}?start={base64_string}"
+
+    string = f"get-{converted_id}"
+    string = string.replace("get-", "premium-")
+    base64_string = await encode(string)
+    link1 = f"https://telegram.me/{client.username}?start={base64_string}"
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Public Link", url=link)],
+            [InlineKeyboardButton("Premium User", url=link1)]
+        ]
+    )
+
+    await reply_text.edit(
+        "<b>> Your Links</b>",
+        disable_web_page_preview=True,
+        reply_markup=keyboard
+    )
