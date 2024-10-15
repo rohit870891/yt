@@ -494,7 +494,7 @@ async def restart(client, message):
 
 
 if USE_PAYMENT:
-@Bot.on_message(filters.private & filters.command('addpaid') & filters.user(ADMINS))
+ @Bot.on_message(filters.private & filters.command('addpaid') & filters.user(ADMINS))
 async def add_premium_user(client: Client, msg: Message):
     if len(msg.command) != 3:
         await msg.reply_text("usage: /addpremium user_id time_limit_months")
